@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model categorias {
+  id            Int             @id @default(autoincrement())
+  nome          String          @unique(map: "nome") @db.VarChar(50)
+  imagem        String?         @db.Text
+  produtos      produtos[]
+  subcategorias subcategorias[]
+}
+
+model produtos {
+  id                Int                 @id @default(autoincrement())
+  nome              String              @db.VarChar(100)
+  descricao         String?             @db.Text
+  preco             Decimal?            @db.Decimal(10, 2)
+  marca             String?             @db.VarChar(100)
+  imagem            String?             @db.VarChar(255)
+  estoque           Int?                @default(0)
+  categoria_id      Int
+  created_at        DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  subcategoria_id   Int?
+  subcategorias     subcategorias?      @relation(fields: [subcategoria_id], references: [id], onUpdate: NoAction, map: "fk_produtos_subcategorias")
+  categorias        categorias          @relation(fields: [categoria_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "produtos_ibfk_1")
+  variacoes_produto variacoes_produto[]
+
+  @@index([categoria_id], map: "categoria_id")
+  @@index([subcategoria_id], map: "fk_produtos_subcategorias")
+}
+
+model tipos_usuarios {
+  id                        Int                         @id @default(autoincrement())
+  tipo                      String                      @unique(map: "tipo") @db.VarChar(50)
+  permissoes_tipos_usuarios permissoes_tipos_usuarios[]
+  usuarios                  usuarios[]
+}
+
+model usuarios {
+  id              Int            @id @default(autoincrement())
+  nome            String         @db.VarChar(100)
+  email           String         @unique(map: "email") @db.VarChar(100)
+  senha           String         @db.VarChar(255)
+  tipo_usuario_id Int
+  created_at      DateTime?      @default(now()) @db.Timestamp(0)
+  updated_at      DateTime?      @default(now()) @db.Timestamp(0)
+  tipos_usuarios  tipos_usuarios @relation(fields: [tipo_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "usuarios_ibfk_1")
+
+  @@index([tipo_usuario_id], map: "tipo_usuario_id")
+}
+
+model subcategorias {
+  id           Int        @id @default(autoincrement())
+  nome         String     @db.VarChar(255)
+  descricao    String?    @db.Text
+  categoria_id Int
+  created_at   DateTime?  @default(now()) @db.DateTime(0)
+  updated_at   DateTime?  @default(now()) @db.DateTime(0)
+  produtos     produtos[]
+  categorias   categorias @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "subcategorias_ibfk_1")
+
+  @@index([categoria_id], map: "categoria_id")
+}
+
+model variacoes_produto {
+  id         Int       @id @default(autoincrement())
+  nome       String    @db.VarChar(255)
+  descricao  String?   @db.Text
+  produto_id Int
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  updated_at DateTime? @default(now()) @db.DateTime(0)
+  produtos   produtos  @relation(fields: [produto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "variacoes_produto_ibfk_1")
+
+  @@index([produto_id], map: "idx_variacoes_produto_produto_id")
+}
+
+model permissoes_tipos_usuarios {
+  id              Int            @id @default(autoincrement())
+  tipo_usuario_id Int
+  permissao       String         @db.VarChar(100)
+  descricao       String?        @db.Text
+  created_at      DateTime?      @default(now()) @db.DateTime(0)
+  updated_at      DateTime?      @default(now()) @db.DateTime(0)
+  tipos_usuarios  tipos_usuarios @relation(fields: [tipo_usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "permissoes_tipos_usuarios_ibfk_1")
+
+  @@index([permissao], map: "idx_permissoes_tipos_usuarios_permissao")
+  @@index([tipo_usuario_id], map: "idx_permissoes_tipos_usuarios_tipo_usuario_id")
+}
