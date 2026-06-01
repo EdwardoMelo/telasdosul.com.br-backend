@@ -7,7 +7,9 @@
     "test": "jest --coverage",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "build": "npx prisma generate",
+    "deploy-production": "python scripts/deploy-production.py"
   },
   "keywords": [],
   "author": "",

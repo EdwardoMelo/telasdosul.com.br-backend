@@ -3,18 +3,34 @@ const ProductService = require("../services/productService");
 class ProductController {
   static async createProduct(req, res) {
     try {
-      const { nome, descricao, preco, marca, imagem, estoque, categoria_id } =
-        req.body;
-      const product = await ProductService.createProduct({
+      const {
         nome,
         descricao,
         preco,
+        tipo_preco,
+        metrica,
+        unidade_metrica,
         marca,
         imagem,
         estoque,
         categoria_id,
+        subcategoria_id,
+      } = req.body;
+      const product = await ProductService.createProduct({
+        nome,
+        descricao,
+        preco,
+        tipo_preco,
+        metrica,
+        unidade_metrica,
+        marca,
+        imagem,
+        estoque,
+        categoria_id,
+        subcategoria_id,
       });
-      res.status(201).json(product);
+      const mapped = await ProductService.getProductById(product.id);
+      res.status(201).json(mapped);
     } catch (error) {
       console.log("error on createProduct: ", error.message);
       res.status(400).json({ error: error.message });
@@ -58,17 +74,32 @@ class ProductController {
   static async updateProduct(req, res) {
     try {
       const { id } = req.params;
-      const { nome, descricao, preco, marca, imagem, estoque, categoria_id } =
-        req.body;
-    
-      const product = await ProductService.updateProduct(Number(id), {
+      const {
         nome,
         descricao,
         preco,
+        tipo_preco,
+        metrica,
+        unidade_metrica,
         marca,
         imagem,
         estoque,
         categoria_id,
+        subcategoria_id,
+      } = req.body;
+
+      const product = await ProductService.updateProduct(Number(id), {
+        nome,
+        descricao,
+        preco,
+        tipo_preco,
+        metrica,
+        unidade_metrica,
+        marca,
+        imagem,
+        estoque,
+        categoria_id,
+        subcategoria_id,
       });
       if (!product)
         return res.status(404).json({ error: "Produto não encontrado" });

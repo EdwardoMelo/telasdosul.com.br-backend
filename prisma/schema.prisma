@@ -15,24 +15,49 @@ model categorias {
   subcategorias subcategorias[]
 }
 
+enum TipoPrecoProduto {
+  FIXO
+  POR_METRICA
+}
+
 model produtos {
-  id                Int                 @id @default(autoincrement())
-  nome              String              @db.VarChar(100)
-  descricao         String?             @db.Text
-  preco             Decimal?            @db.Decimal(10, 2)
-  marca             String?             @db.VarChar(100)
-  imagem            String?             @db.VarChar(255)
-  estoque           Int?                @default(0)
-  categoria_id      Int
-  created_at        DateTime?           @default(now()) @db.Timestamp(0)
-  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
-  subcategoria_id   Int?
-  subcategorias     subcategorias?      @relation(fields: [subcategoria_id], references: [id], onUpdate: NoAction, map: "fk_produtos_subcategorias")
-  categorias        categorias          @relation(fields: [categoria_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "produtos_ibfk_1")
-  variacoes_produto variacoes_produto[]
+  id                  Int                   @id @default(autoincrement())
+  nome                String                @db.VarChar(100)
+  descricao           String?               @db.Text
+  preco               Decimal?              @db.Decimal(10, 2)
+  tipo_preco          TipoPrecoProduto      @default(FIXO)
+  metrica             String?               @db.VarChar(50)
+  unidade_metrica     String?               @default("m") @db.VarChar(10)
+  marca               String?               @db.VarChar(100)
+  imagem              String?               @db.VarChar(255)
+  estoque             Int?                  @default(0)
+  categoria_id        Int
+  created_at          DateTime?             @default(now()) @db.Timestamp(0)
+  updated_at          DateTime?             @default(now()) @db.Timestamp(0)
+  subcategoria_id     Int?
+  subcategorias       subcategorias?        @relation(fields: [subcategoria_id], references: [id], onUpdate: NoAction, map: "fk_produtos_subcategorias")
+  categorias          categorias            @relation(fields: [categoria_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "produtos_ibfk_1")
+  variacoes_produto   variacoes_produto[]
+  linhas_preco_produto linhas_preco_produto[]
 
   @@index([categoria_id], map: "categoria_id")
   @@index([subcategoria_id], map: "fk_produtos_subcategorias")
+}
+
+model linhas_preco_produto {
+  id         Int       @id @default(autoincrement())
+  produto_id Int
+  valor      Decimal   @db.Decimal(10, 2)
+  preco      Decimal   @db.Decimal(10, 2)
+  rotulo     String?   @db.VarChar(100)
+  ordem      Int       @default(0)
+  ativo      Boolean   @default(true)
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  updated_at DateTime? @default(now()) @db.DateTime(0)
+  produtos   produtos  @relation(fields: [produto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "linhas_preco_produto_ibfk_1")
+
+  @@unique([produto_id, valor], map: "uq_linhas_preco_produto_valor")
+  @@index([produto_id, ordem], map: "idx_linhas_preco_produto_ordem")
 }
 
 model tipos_usuarios {
